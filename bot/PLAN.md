@@ -1,4 +1,5 @@
+# Bot Development Plan
 
-Task 1 scaffold update.
+The goal is to build a Telegram bot in a way that keeps the command logic testable without Telegram itself. I will separate the transport layer from the handler layer so that command handlers are plain Python functions returning strings. The bot entry point will support a `--test` mode that accepts a text command from the CLI, routes it to the same handlers, prints the result to stdout, and exits with code 0. This allows the autochecker to verify behavior without connecting to Telegram.
 
-Task 1 scaffold update.
+The first step is to scaffold the bot project structure inside `bot/`, including `bot.py`, `handlers/`, `config.py`, and `pyproject.toml`. The second step is to implement placeholder handlers for `/start`, `/help`, `/health`, and unknown commands. For this task, handlers can return simple text, but they must not crash. The third step is to keep configuration loading isolated in one place so environment variables can be added later without rewriting command logic. After that, I will verify the scaffold with `uv sync` and test mode commands. Later tasks will connect the same handler architecture to the LMS backend and then to Telegram transport.
