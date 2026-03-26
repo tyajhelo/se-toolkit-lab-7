@@ -1,19 +1,17 @@
 import argparse
 from handlers import handle_command
 
-
-def main() -> int:
+def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--test", dest="test_input")
+    parser.add_argument("--test", type=str)
     args = parser.parse_args()
 
-    if args.test_input is not None:
-        print(handle_command(args.test_input))
+    if args.test:
+        print(handle_command(args.test))
         return 0
 
-    print("Telegram mode is not implemented yet. Use --test.")
+    print("Run with --test")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

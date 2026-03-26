@@ -1,5 +1,11 @@
-# Bot Development Plan
+# Development Plan
 
-The goal is to build a Telegram bot in a way that keeps the command logic testable without Telegram itself. I will separate the transport layer from the handler layer so that command handlers are plain Python functions returning strings. The bot entry point will support a `--test` mode that accepts a text command from the CLI, routes it to the same handlers, prints the result to stdout, and exits with code 0. This allows the autochecker to verify behavior without connecting to Telegram.
+The goal of this project is to build a Telegram bot with a clean architecture that separates command handling logic from the Telegram transport layer. The bot will be structured so that all handlers are simple Python functions that take a string input and return a string output. This allows testing the bot without needing Telegram.
 
-The first step is to scaffold the bot project structure inside `bot/`, including `bot.py`, `handlers/`, `config.py`, and `pyproject.toml`. The second step is to implement placeholder handlers for `/start`, `/help`, `/health`, and unknown commands. For this task, handlers can return simple text, but they must not crash. The third step is to keep configuration loading isolated in one place so environment variables can be added later without rewriting command logic. After that, I will verify the scaffold with `uv sync` and test mode commands. Later tasks will connect the same handler architecture to the LMS backend and then to Telegram transport.
+The first step is to scaffold the project structure inside the bot directory. This includes creating the entry point (bot.py), handler modules, configuration file, and dependency file. The bot will support a CLI test mode using the --test flag, which allows commands to be executed locally.
+
+In the second stage, the bot will integrate with the backend API using LMS_API_KEY and LMS_API_BASE_URL. Services will be added to fetch data from endpoints like /items and /analytics.
+
+In the third stage, the bot will support natural language input using an LLM. The bot will route user input either to handlers or to the LLM.
+
+Finally, the bot will be deployed and connected to Telegram using BOT_TOKEN, while preserving the same handler logic.
