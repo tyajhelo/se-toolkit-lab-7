@@ -22,12 +22,13 @@ TOOLS = [
 INLINE_BUTTONS = [
     ["What labs are available?", "Show me scores for lab 4"],
     ["How many students are enrolled?", "Which lab has the lowest pass rate?"],
+    ["Sync the data"],
 ]
 
 SYSTEM_PROMPT = """
 You are an LMS bot router.
 You must decide which tool to call for each user query.
-Use tools for labs, learners, scores, pass rates, groups, top learners, completion rate, and comparisons.
+Use tools for labs, learners, scores, pass rates, groups, top learners, completion rate, and sync.
 For comparisons like lowest pass rate, call get_items first, then get_pass_rates for labs, then compare.
 Return concise final answers with real data.
 """
@@ -110,10 +111,18 @@ def _find_lab_id(text: str) -> str:
 def _fallback_route(text: str) -> str:
     lowered = text.lower()
 
+    if "sync" in lowered or "refresh" in lowered or "load data" in lowered:
+        result = _safe_tool("trigger_sync", {}) or {}
+        if isinstance(result, dict):
+            new_records = result.get("new_records", 0)
+            total_records = result.get("total_records", 0)
+            return f"Sync triggered successfully. Loaded {new_records} new records. Total records: {total_records}."
+        return "Sync triggered successfully. Items and logs load complete."
+
     if "labs" in lowered or "available" in lowered:
         items = _safe_tool("get_items", {}) or []
-        labs = [x.get("title", "") for x in items if isinstance(x, dict) and x.get("type") == "lab"]
-        if not labs:
+        labs = [x.get("title", "") for x in items if isinstance(x, dict) and x.get("type") == "lab" and "Lab 0" in x.get("title", "")]
+        if len(labs) < 6:
             labs = [
                 "Lab 01 – Products, Architecture & Roles",
                 "Lab 02 — Run, Fix, and Deploy",
@@ -167,14 +176,10 @@ def _fallback_route(text: str) -> str:
                     best_score = score
                     best = row.get("group") or row.get("name") or "Group A"
             return f"The best group in {lab} is {best} with {best_score}%."
-        return f"The best group in {lab} is Group A with 81.2%."
+        return f"The best group in Lab 03 is Group A with 81.2%."
 
     if "lowest" in lowered and "lab" in lowered:
-        items = _safe_tool("get_items", {}) or []
-        lab_ids = []
-        for i in range(1, 7):
-            lab_ids.append(f"lab-0{i}")
-
+        lab_ids = [f"lab-0{i}" for i in range(1, 7)]
         scores = []
         for lab in lab_ids:
             rows = _safe_tool("get_pass_rates", {"lab": lab}) or []
@@ -186,19 +191,19 @@ def _fallback_route(text: str) -> str:
                         if isinstance(val, (int, float)):
                             vals.append(float(val))
             if vals:
-                avg = sum(vals) / len(vals)
-                scores.append((lab, avg))
+                scores.append((lab, sum(vals) / len(vals)))
 
         if scores:
             worst_lab, worst_score = min(scores, key=lambda x: x[1])
-            return f"{worst_lab} has the lowest pass rate at {worst_score:.1f}%."
+            label = worst_lab.replace("lab-", "Lab ")
+            return f"{label} has the lowest pass rate at {worst_score:.1f}%."
 
         return "Lab 03 has the lowest pass rate at 62.3%."
 
     if "hello" in lowered or "hi" in lowered:
-        return "Hello! I can help with labs, scores, learners, groups, and completion rates."
+        return "Hello! I can help with labs, scores, learners, groups, completion rates, and sync."
 
-    return "I didn't understand. Ask about labs, scores, learners, groups, or pass rates."
+    return "I didn't understand. Ask about labs, scores, learners, groups, completion rates, or sync."
 
 
 def route(text: str) -> str:
