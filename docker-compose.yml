@@ -56,6 +56,23 @@ services:
       timeout: 5s
       retries: 5
 
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      LMS_API_BASE_URL: http://backend:8000
+      LMS_API_KEY: ${LMS_API_KEY}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_API_BASE_URL: http://host.docker.internal:42005/v1
+      LLM_API_MODEL: ${LLM_API_MODEL}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   pgadmin:
     image: ${REGISTRY_PREFIX:-harbor.pg.innopolis.university/docker-hub-cache/}dpage/pgadmin4:latest
     restart: unless-stopped

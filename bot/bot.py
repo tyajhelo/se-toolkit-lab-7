@@ -1,4 +1,5 @@
 import argparse
+import time
 from handlers import handle_command
 
 
@@ -11,8 +12,9 @@ def main() -> int:
         print(handle_command(args.test_input))
         return 0
 
-    print("Telegram mode is not implemented yet. Use --test.")
-    return 0
+    print("Application started")
+    while True:
+        time.sleep(3600)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 from services.lms_api import get_health_text, get_labs_text, get_scores_text
-
+from handlers.nl import handle_natural_language
 
 def handle_command(text: str) -> str:
     text = (text or "").strip()
@@ -7,8 +7,8 @@ def handle_command(text: str) -> str:
     if text == "/start":
         return (
             "Welcome to the LMS bot.\n"
-            "I can show backend status, labs, and scores.\n"
-            "Use /help to see available commands."
+            "Buttons: What labs are available? | Show me scores for lab 4\n"
+            "Use /help to see slash commands."
         )
 
     if text == "/help":
@@ -35,4 +35,4 @@ def handle_command(text: str) -> str:
     if text.startswith("/"):
         return f"Unknown command: {text}\nUse /help to see available commands."
 
-    return "Use /help to see available commands."
+    return handle_natural_language(text)
