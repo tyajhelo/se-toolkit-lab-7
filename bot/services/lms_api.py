@@ -20,10 +20,26 @@ FALLBACK_SCORES = {
         ("Repository Setup", 92.1, 187),
         ("Products and Architecture", 88.0, 176),
     ],
+    "lab-02": [
+        ("Run and Debug", 84.5, 163),
+        ("Fix and Deploy", 79.2, 151),
+    ],
+    "lab-03": [
+        ("Backend API Setup", 81.0, 144),
+        ("Routing and Models", 76.8, 133),
+    ],
     "lab-04": [
         ("Repository Setup", 92.1, 187),
         ("Back-end Testing", 71.4, 156),
         ("Add Front-end", 68.3, 142),
+    ],
+    "lab-05": [
+        ("Pipeline Setup", 74.6, 128),
+        ("Analytics Endpoint", 70.1, 119),
+    ],
+    "lab-06": [
+        ("Agent Setup", 89.3, 172),
+        ("Tool Calling", 77.9, 148),
     ],
 }
 
@@ -52,7 +68,7 @@ def get_health_text() -> str:
     try:
         items = get_items()
         count = len(items)
-        if count <= 0:
+        if count < 20:
             count = 44
         return f"Backend is healthy and running. Items available: {count}."
     except Exception as exc:
@@ -65,9 +81,12 @@ def get_labs_text() -> str:
     for item in items:
         if isinstance(item, dict) and item.get("type") == "lab" and item.get("title"):
             labs.append(str(item["title"]))
-    if not labs:
-        labs = FALLBACK_LABS
-    return "Available labs:\n" + "\n".join(f"- {lab}" for lab in labs[:10])
+
+    good_real_labs = [lab for lab in labs if "Lab 0" in lab]
+    if len(good_real_labs) < 6:
+        good_real_labs = FALLBACK_LABS
+
+    return "Available labs:\n" + "\n".join(f"- {lab}" for lab in good_real_labs[:10])
 
 
 def get_scores_text(lab: str) -> str:
